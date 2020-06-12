@@ -8,7 +8,7 @@ from tensorflow.keras.optimizers import *
 
 from loss.dk_loss import *
 
-class Kagan(SegmentationModel):
+class Kegan(SegmentationModel):
     def __init__(self, img_height, img_width, class_num, optimizer, 
                  loss = 'mse', metrics = ['accuracy'], save_path='./kagan.h5', fcn_level = 32):
         super().__init__(save_path)
@@ -17,7 +17,7 @@ class Kagan(SegmentationModel):
         self.fcn_level = fcn_level
         self.class_num = class_num
 
-        self.model = _build_model()
+        self.model = self._build_model()
         self.model.compile(loss=loss, optimizer = optimizer, metrics=metrics)
 
     def train(self, x, y, batch_size=20, epochs=10, validation_data=None):
