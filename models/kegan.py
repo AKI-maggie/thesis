@@ -1,5 +1,5 @@
 # This file contains the main structure of the KAGAN model
-from models.segmentation import SegmentationModel
+from models.basic import BasicModel
 import tensorflow as tf
 from tensorflow.keras.layers import *
 from tensorflow.keras.applications.resnet import *
@@ -8,7 +8,7 @@ from tensorflow.keras.optimizers import *
 
 from loss.dk_loss import *
 
-class Kegan(SegmentationModel):
+class Kegan(BasicModel):
     def __init__(self, img_height, img_width, class_num, optimizer, 
                  loss = 'mse', metrics = ['accuracy'], save_path='./kagan.h5', fcn_level = 32):
         super().__init__(save_path)
@@ -28,21 +28,6 @@ class Kegan(SegmentationModel):
 
     def predict(self, x):
         return np.argmax(self.model.predict(x), axis=3)
-
-    def save(self):
-        self.model.save_weights(self.save_path)
-    
-    def load(self, save_path=None):
-        if save_path != None:
-            self.model.load_weights(save_path)
-            # save the new weights in its saving path
-            self.save()
-        else:
-            if os.path.exists(self.save_path):
-                print("Pretrained weights found")
-                self.model.load_weights(self.save_path)
-            else:
-                print("Pretrained weights not found")
 
     def _build_model(self):
         img_input = Input(shape=(self.img_height, self.img_width, 3))

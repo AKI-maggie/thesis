@@ -36,6 +36,7 @@ class SiftFlowLoader(DataLoader):
                     self.img_ids.append(fid)
         return len(self.img_ids)
 
+    # rule: load enough images that could provide k shots for each class
     def check_datatset_completence(self, counts, k):
         count = 0
         for each in counts:
@@ -45,7 +46,7 @@ class SiftFlowLoader(DataLoader):
         return True
 
     def separate_labels(self, lb, nc):
-        seg_lb = np.zeros((lb.shape[0], lb.shape[1], nc))
+        seg_lb = np.zeros((lb.shape[0], lb.shape[1], nc + 1))
         for i in range(nc):
             seg_lb[:,:,i] = (lb==i).astype(int)
         return seg_lb
