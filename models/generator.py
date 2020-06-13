@@ -24,19 +24,19 @@ class Generator(BasicModel):
         x.add(Reshape((8, 8, 256)))
 
         # deconvolutional layer
-        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
-        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
-        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
-        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 

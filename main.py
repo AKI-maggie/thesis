@@ -17,8 +17,8 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 50
 		# get randomly selected 'real' samples
         x_real, y_real = next(iterator)
         # update discriminator on real samples
-        model.train(x_real, y_real, batch_size=20, epochs=10, 
-                    validation_data=data_loader.generate_testing_dataset(), callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
+        model.d_train(x_real, y_real, batch_size=20, epochs=10, 
+                    validation_data=data_loader.generate_testing_dataset())# callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
 
         # if i % 5 == 1 and not math.isnan(model.get_weights(-2)):
             # print("Save new weight at iter {0}".format(i))
@@ -34,4 +34,4 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 50
 		# get randomly selected 'real' samples
         x_real, y_real = next(iterator)
         model.gan_train(x_real, y_real, batch_size=20, epochs=10, 
-                validation_data=data_loader.generate_testing_dataset(), callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
+                validation_data=data_loader.generate_testing_dataset()) #callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
