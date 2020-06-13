@@ -1,6 +1,15 @@
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import *
 from models.basic import BasicModel
+from numpy.random import randn
+
+# generate points in latent space as input for the generator
+def generate_latent_points(latent_dim, n_samples):
+	# generate points in the latent space
+	x_input = randn(latent_dim * n_samples)
+	# reshape into a batch of inputs for the network
+	x_input = x_input.reshape(n_samples, latent_dim)
+	return x_input
 
 class Generator(BasicModel):
     def __init__(self, latent_dim = 100,
