@@ -20,9 +20,12 @@ class Kegan(SegmentationModel):
         self.model = self._build_model()
         self.model.compile(loss=loss, optimizer = optimizer, metrics=metrics)
 
-    def train(self, x, y, batch_size=20, epochs=10, validation_data=None):
-        self.model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data)
+    def train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
+        self.model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)
     
+    def get_weights(self, layer_index):
+        return self.model.layers[layer_index].get_weights()[0][0][0][0][0]
+
     def predict(self, x):
         return np.argmax(self.model.predict(x), axis=3)
 
@@ -35,7 +38,11 @@ class Kegan(SegmentationModel):
             # save the new weights in its saving path
             self.save()
         else:
-            self.model.load_weights(self.save_path)
+            if os.path.exists(self.save_path):
+                print("Pretrained weights found")
+                self.model.load_weights(self.save_path)
+            else:
+                print("Pretrained weights not found")
 
     def _build_model(self):
         img_input = Input(shape=(self.img_height, self.img_width, 3))

@@ -77,7 +77,7 @@ class SiftFlowLoader(DataLoader):
             x_test.append(fimg)
             y_test.append(flabel)
         
-        return x_test, y_test
+        return np.array(x_test), np.array(y_test)
 
     def _generate_train(self, k, img_height, img_width): 
         # load images and corresponding labels
