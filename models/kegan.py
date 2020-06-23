@@ -16,7 +16,7 @@ class Kegan(BasicModel):
     def __init__(self, img_height, img_width, class_num, 
                  d_optimizer, 
                  g_optimizer,
-                 d_loss = 'mse', 
+                 d_loss = 'categorical_crossentropy', 
                  g_loss = 'binary_crossentropy',
                  d_metrics = ['accuracy'], 
                  save_path='./kagan.h5', fcn_level = 32):
