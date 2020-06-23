@@ -53,15 +53,15 @@ class SiftFlowLoader(DataLoader):
 
     def generate_training_batches(self,  
                                   k = 1,   # k - number of shots for each class
-                                  img_height = 128,
-                                  img_width = 128):
+                                  img_height = 256,
+                                  img_width = 256):
         while True:
             # randomly choose a batch of k images
             yield (self._generate_train(k, img_height, img_width))
 
     def generate_testing_dataset(self, num = 10, 
-                                 img_height = 128,
-                                 img_width = 128):
+                                 img_height = 256,
+                                 img_width = 256):
         img_ids = self.img_ids[-self.test_num:]
         x_test = []
         y_test = []
