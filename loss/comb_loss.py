@@ -28,8 +28,8 @@ def combination_loss(y_true, y_pred):
     # unlabeled data
     sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(1-y_pred[:, :, :, -1] * tf.cast((mask == -1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==-1), tf.float32))
     # labeled data
-    labeled_ypred = y_pred[mask == 0][:, :-1]
-    labeled_ytrue = y_true[mask == 0][:, :-1]
+    labeled_ypred = y_pred[:, :, :, :-1][mask == 0]
+    labeled_ytrue = y_true[:, :, :, :-1][mask == 0]
     sum += gamma * categorical_crossentropy(labeled_ytrue, labeled_ypred)
 
     return sum
