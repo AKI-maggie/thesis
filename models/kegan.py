@@ -152,7 +152,7 @@ class Kegan(BasicModel):
                                         )(conv7_upsampling)
                     
         if self.fcn_level == 32:  # return at fcn level 32
-            # fcn32 = (Activation('softmax'))(fcn32)
+            fcn32 = (Activation('softmax'))(fcn32)
             return Model(img_input,fcn32)
 
         # FCN-16 addition
@@ -183,7 +183,7 @@ class Kegan(BasicModel):
                                     use_bias=False,
                                     data_format='channels_last'
                                     )(fcn16)
-            # fcn16 = (Activation('softmax'))(fcn16)
+            fcn16 = (Activation('softmax'))(fcn16)
             return Model(img_input,fcn16)
 
         # FCN-8 addition
@@ -209,16 +209,17 @@ class Kegan(BasicModel):
                                 data_format='channels_last'
                                 )(fcn8)
 
-        # final = (Activation('softmax'))(final)
+        final = (Activation('softmax'))(final)
 
         return Model(img_input,final)  # return at fcn level 8
 
     def _build_ssp(self, feature_map, last_shape):
+        print(last_shape)
         # bin1
-        ws1 = ceil(last_shape/1)
+        ws1 = ceil(last_shape/1)  
         ss1 = floor(last_shape/1)
         # build 4 different bins from the feature map extracted by previous FCN
-        bin1 = AveragePooling2D(name='spp1', pool_size=(ws1, ws1), strides=ss1)(feature_map)
+        bin1 = MaxPooling2D(name='spp1', pool_size=(ws1, ws1), strides=ss1)(feature_map)
         conv_bin1 = Conv2D(name='spp1_conv', activation='relu',kernel_size=1, padding='same',filters=1)(bin1)
         # upsample
         up_bin1 = Conv2DTranspose(name='spp1_up', filters=1, kernel_size=ws1, strides=ss1)(conv_bin1)
@@ -226,7 +227,7 @@ class Kegan(BasicModel):
         # bin2
         ws2 = ceil(last_shape/2)
         ss2 = floor(last_shape/2)
-        bin2 = AveragePooling2D(name='spp2', pool_size=(ws2, ws2), strides=ss2)(feature_map)
+        bin2 = MaxPooling2D(name='spp2', pool_size=(ws2, ws2), strides=ss2)(feature_map)
         conv_bin2 = Conv2D(name='spp2_conv', activation='relu',kernel_size=1, padding='same',filters=1)(bin2)
         # upsample
         up_bin2 = Conv2DTranspose(name='spp2_up', filters=1, kernel_size=ws2, strides=ss2)(conv_bin2)
@@ -234,17 +235,15 @@ class Kegan(BasicModel):
         # bin3
         ws3 = ceil(last_shape/3)
         ss3 = floor(last_shape/3)
-        print(ws3)
-        print(ss3)
-        bin3 = AveragePooling2D(pool_size=(ws3, ws3), strides=ss3)(feature_map)
+        bin3 = MaxPooling2D(name='spp3',pool_size=(ws3, ws3), strides=ss3)(feature_map)
         conv_bin3 = Conv2D(name='spp3_conv', activation='relu',kernel_size=1, padding='same',filters=1)(bin3)
         # upsample
         up_bin3 = Conv2DTranspose(name='spp3_up', filters=1, kernel_size=4, strides=ss3)(conv_bin3)
 
         # bin4
-        ws4 = ceil(last_shape/6)
+        ws4 = ceil(last_shape/6)+1
         ss4 = floor(last_shape/6)
-        bin4 = AveragePooling2D(pool_size=(ws4, ws4), strides=ss4)(feature_map)
+        bin4 = MaxPooling2D(name='spp4',pool_size=(ws4, ws4), strides=ss4)(feature_map)
         conv_bin4 = Conv2D(name='spp4_conv', activation='relu',kernel_size=1, padding='same',filters=1)(bin4)
         # upsample
         up_bin4 = Conv2DTranspose(name='spp4_up', filters=1, kernel_size=ws4, strides=ss4)(conv_bin4)
