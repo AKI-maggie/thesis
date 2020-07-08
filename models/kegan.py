@@ -34,16 +34,16 @@ class Kegan(BasicModel):
         self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
 
         # build generator
-        self.g_model = self._build_g_model()
+        # self.g_model = self._build_g_model()
 
         # build gan structure
-        self.gan_model = self._build_gan(self.d_model)
-        self.gan_model.compile(loss=g_loss, optimizer = g_optimizer)
+        # self.gan_model = self._build_gan(self.d_model)
+        # self.gan_model.compile(loss=g_loss, optimizer = g_optimizer)
 
         # descriminator saving path
         self.d_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
         # gan model saving path
-        self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
+        # self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
 
     def d_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
         self.d_model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)

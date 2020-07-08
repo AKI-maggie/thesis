@@ -7,6 +7,15 @@ import tensorflow.keras.backend as K
 
 from graph.knowledge_graph import *
 
+# labels for siftflow
+siftflow_labels = ["awning", "balcony", "bird", "boat", "bridge", "building", "bus", \
+          "car", "cow", "crosswalk", "desert", "door", "fence", "field", \
+          "grass", "moon", "mountain", "person", "plant", "pole", "river", \
+          "road", "rock", "sand", "sea", "sidewalk", "sign", "sky", \
+          "staircase", "streetlight", "sun", "tree", "window"]
+          
+kgraph = CN_based_KnowledgeGraph(siftflow_labels, 0.15, 100, '/content/drive/My Drive/thesis/siftflow_similarity.txt')
+
 def dk_distance(y_neighbor, y):
     return y_neighbor * K.log(tf.math.divide_no_nan(y_neighbor,y)) + (1-y_neighbor) * K.log(tf.math.divide_no_nan((1-y_neighbor),(1-y)))
 

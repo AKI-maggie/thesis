@@ -48,6 +48,7 @@ class CN_based_KnowledgeGraph(KnowledgeGraph):
             self._build_edges()
             self._build_prob_matrix()
             self._build_simi_matrix(self.restart_rate, self.max_iter)
+            np.savetxt(save_path, self.simi_matrix)
         
         self.simi_tf = tf.convert_to_tensor(self.simi_matrix)
 
