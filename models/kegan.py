@@ -61,7 +61,7 @@ class Kegan(BasicModel):
         self.d_model.save_weights(self.d_save_path)
 
     def d_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
-        self.d_model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)
+        return self.d_model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)
 
     def gan_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
         bat_per_epo = int(x.shape[0] / batch_size)
