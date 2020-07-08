@@ -41,7 +41,10 @@ class Kegan(BasicModel):
         # self.gan_model.compile(loss=g_loss, optimizer = g_optimizer)
 
         # descriminator saving path
-        self.d_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
+        if use_pyramid:
+            self.d_save_path = os.path.join((os.path.split(save_path))[0], 's_d.h5')
+        else:
+            self.d_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
         # gan model saving path
         # self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
 
