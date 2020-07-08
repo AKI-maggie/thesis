@@ -45,6 +45,21 @@ class Kegan(BasicModel):
         # gan model saving path
         # self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
 
+    def d_load(self, save_path=None):
+        if save_path != None:
+            self.d_model.load_weights(save_path)
+            # save the new weights in its saving path
+            self.d_save()
+        else:
+            if os.path.exists(self.d_save_path):
+                print("Pretrained weights found")
+                self.d_model.load_weights(self.d_save_path)
+            else:
+                print("Pretrained weights not found")
+
+    def d_save(self):
+        self.d_model.save_weights(self.d_save_path)
+
     def d_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
         self.d_model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)
 

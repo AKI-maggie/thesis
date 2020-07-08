@@ -2,20 +2,24 @@
 import os
 import math
 from tensorflow.keras.callbacks import LambdaCallback
+import numpy as np
 
 def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 24, batch_size=8, epochs=10):
     # model.load()
 
     # prepare training data loader
     iterator = data_loader.generate_training_batches(n_batch)
-    x_real, y_real = [], []
+    x_real, y_real = np.array([]), np.array([])
 	# manually enumerate epochs
+    model.d_load()
     print("### Start Training ###")
     for i in range(n_iter):
         print("=======================================================")
         print("Training Procedure {0}".format(i+1))
-        del x_real[:]
-        del y_real[:]
+        x_real = None
+        y_real = None
+        del x_real
+        del y_real
 		# get randomly selected 'real' samples
         x_real, y_real = next(iterator)
         # update discriminator on real samples
@@ -26,9 +30,9 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 24
             # print("Save new weight at iter {0}".format(i))
             # model.save()
         # if i % 10 == 5 and not math.isnan(model.layers[-2].get_weights()[0][0][0][0][0]):
-        if i % 10 == 5:
+        if i % 10 == 1:
             print("Save new weight at iter {0}".format(i))
-            model.save()
+            model.d_save()
     print("Discriminator Training complete.")
 
     # for i in range(n_iter):
