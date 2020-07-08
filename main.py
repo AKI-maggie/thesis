@@ -14,8 +14,8 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 24
     for i in range(n_iter):
         print("=======================================================")
         print("Training Procedure {0}".format(i+1))
-        del x_real
-        del y_real
+        del x_real[:]
+        del y_real[:]
 		# get randomly selected 'real' samples
         x_real, y_real = next(iterator)
         # update discriminator on real samples
