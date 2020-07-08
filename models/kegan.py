@@ -19,7 +19,8 @@ class Kegan(BasicModel):
                  d_loss = 'categorical_crossentropy', 
                  g_loss = 'binary_crossentropy',
                  d_metrics = ['accuracy'], 
-                 save_path='./kagan.h5', fcn_level = 32):
+                 save_path='./kagan.h5', fcn_level = 32,
+                 use_pyramid = True):
 
         # set basic configuration variables
         super().__init__(save_path)
@@ -29,20 +30,20 @@ class Kegan(BasicModel):
         self.class_num = class_num
 
         # build descriminator
-        self.d_model = self._build_d_model()
+        self.d_model = self._build_d_model(use_pyramid)
         self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
 
         # build generator
-        # self.g_model = self._build_g_model()
+        self.g_model = self._build_g_model()
 
         # build gan structure
-        # self.gan_model = self._build_gan(self.d_model)
-        # self.gan_model.compile(loss=g_loss, optimizer = g_optimizer)
+        self.gan_model = self._build_gan(self.d_model)
+        self.gan_model.compile(loss=g_loss, optimizer = g_optimizer)
 
         # descriminator saving path
         self.d_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
         # gan model saving path
-        # self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
+        self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
 
     def d_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
         self.d_model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)
@@ -109,7 +110,7 @@ class Kegan(BasicModel):
     def _build_g_model(self):
         return Generator(self.class_num, img_height=self.img_height, img_width=self.img_width)
 
-    def _build_d_model(self):
+    def _build_d_model(self, use_pyramid):
         img_input = Input(shape=(self.img_height, self.img_width, 3))
         
         # use Res50 as base model
@@ -132,7 +133,8 @@ class Kegan(BasicModel):
                         data_format='channels_last'
                         )(conv6)
 
-        conv7 = self._build_ssp(conv7, conv7.shape[1])
+        if use_pyramid:
+            conv7 = self._build_ssp(conv7, conv7.shape[1])
 
         # upsampling
         conv7_upsampling = Conv2DTranspose(name='conv7_upsampling',

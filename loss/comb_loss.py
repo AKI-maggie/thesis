@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.losses import categorical_crossentropy
+from loss.dk_loss import dk_loss
 
 gamma = 1
 
@@ -32,5 +33,5 @@ def combination_loss(y_true, y_pred):
     labeled_ytrue = y_true[:, :, :, :-1][mask == 0]
     sum += gamma * categorical_crossentropy(labeled_ytrue, labeled_ypred)
 
-    return sum
+    return sum + 0.001 * dk_loss(y_true, y_pred)
 

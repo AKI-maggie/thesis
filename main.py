@@ -3,7 +3,7 @@ import os
 import math
 from tensorflow.keras.callbacks import LambdaCallback
 
-def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 50):
+def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 8):
     # model.load()
 
     # prepare training data loader
@@ -17,7 +17,7 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 50
 		# get randomly selected 'real' samples
         x_real, y_real = next(iterator)
         # update discriminator on real samples
-        model.d_train(x_real, y_real, batch_size=20, epochs=10, 
+        model.d_train(x_real, y_real, batch_size=n_batch, epochs=10, 
                     validation_data=data_loader.generate_testing_dataset())# callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
 
         # if i % 5 == 1 and not math.isnan(model.get_weights(-2)):
@@ -28,10 +28,10 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 50
         #     model.save_weights(checkpoint_path2)
     print("Discriminator Training complete.")
 
-    for i in range(n_iter):
-        print("=======================================================")
-        print("Training Procedure {0}".format(i+1))
-		# get randomly selected 'real' samples
-        x_real, y_real = next(iterator)
-        model.gan_train(x_real, y_real, batch_size=20, epochs=10, 
-                validation_data=data_loader.generate_testing_dataset()) #callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
+    # for i in range(n_iter):
+    #     print("=======================================================")
+    #     print("Training Procedure {0}".format(i+1))
+	# 	# get randomly selected 'real' samples
+    #     x_real, y_real = next(iterator)
+    #     model.gan_train(x_real, y_real, batch_size=20, epochs=10, 
+    #             validation_data=data_loader.generate_testing_dataset()) #callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])

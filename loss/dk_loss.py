@@ -64,4 +64,4 @@ def dk_loss(y_true, y_pred):
         count += 1
     a = tf.cast(count * 128 * 128, dtype=tf.float32)
     s = s / a
-    return 0.0001 * s + 0.01 * keras.losses.categorical_crossentropy(y_true, y_pred)
+    return s

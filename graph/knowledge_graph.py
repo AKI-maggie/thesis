@@ -39,10 +39,10 @@ class CN_based_KnowledgeGraph(KnowledgeGraph):
             self.simi_matrix = np.loadtxt(save_path)
             for i in range(self.simi_matrix.shape[0]):
                 rank_idx = self.simi_matrix[i].argsort()[-3:][::-1]
-                # print("The closest words for {0} are: {1}, {2}, {3}"\
-                #     .format(self.nodes[i], self.nodes[rank_idx[0]],\
-                #             self.nodes[rank_idx[1]], self.nodes[rank_idx[2]]))
-                # print(self.simi_matrix[i])
+                print("The closest words for {0} are: {1}, {2}, {3}"\
+                    .format(self.nodes[i], self.nodes[rank_idx[0]],\
+                            self.nodes[rank_idx[1]], self.nodes[rank_idx[2]]))
+                print(self.simi_matrix[i])
         else:
             print ("Pre-trained Graph not exist, start training...")
             self._build_edges()
@@ -75,9 +75,10 @@ class CN_based_KnowledgeGraph(KnowledgeGraph):
             for j in range(i+1, len(self.nodes)):
                 e = self.search_engine.check_edge(self.nodes[i], self.nodes[j])
                 if e:
-                    self._register_neighbor(self.nodes[i], self.nodes[j])
-                    self._register_neighbor(self.nodes[j], self.nodes[i])
+                    self._register_neighbors(self.nodes[i], self.nodes[j])
+                    self._register_neighbors(self.nodes[j], self.nodes[i])
             self.progress.update_progress(i/(len(self.nodes)-1))
+        self.progress.update_progress((len(self.nodes)-1)/(len(self.nodes)-1))
     
     def _build_simi_matrix(self, restart_rate, max_iter=20):
         # first build Rs and R's
@@ -87,6 +88,7 @@ class CN_based_KnowledgeGraph(KnowledgeGraph):
             start = np.zeros(self.prob_matrix.shape[0])
             start[i] = 1
             v = start.copy()
+            # random walk
             for step in range(max_iter):
                 v = (1-restart_rate)*np.dot(self.prob_matrix, v) + restart_rate * start
             r_matrix[i] = v    
