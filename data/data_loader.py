@@ -27,6 +27,8 @@ class SiftFlowLoader(DataLoader):
         super().__init__(img_path, label_path)
         self.test_num = test_num
         self.class_num = 33
+
+        self.test_data = self.generate_testing_dataset()
         
     def _load(self):
         for root, dirs, files in os.walk(self.img_p):

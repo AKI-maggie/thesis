@@ -34,4 +34,3 @@ def combination_loss(y_true, y_pred):
     sum += gamma * categorical_crossentropy(labeled_ytrue, labeled_ypred)
 
     return 0.1 * sum + 0.001 * dk_loss(y_true, y_pred)
-
