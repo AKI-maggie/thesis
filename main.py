@@ -8,12 +8,14 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 24
 
     # prepare training data loader
     iterator = data_loader.generate_training_batches(n_batch)
-
+    x_real, y_real = [], []
 	# manually enumerate epochs
     print("### Start Training ###")
     for i in range(n_iter):
         print("=======================================================")
         print("Training Procedure {0}".format(i+1))
+        del x_real
+        del y_real
 		# get randomly selected 'real' samples
         x_real, y_real = next(iterator)
         # update discriminator on real samples
@@ -23,7 +25,8 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 100, n_batch = 24
         # if i % 5 == 1 and not math.isnan(model.get_weights(-2)):
             # print("Save new weight at iter {0}".format(i))
             # model.save()
-        if i % 10 == 5 and not math.isnan(model.layers[-2].get_weights()[0][0][0][0][0]):
+        # if i % 10 == 5 and not math.isnan(model.layers[-2].get_weights()[0][0][0][0][0]):
+        if i % 10 == 5:
             print("Save new weight at iter {0}".format(i))
             model.save()
     print("Discriminator Training complete.")
