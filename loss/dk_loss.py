@@ -30,7 +30,7 @@ def recursive_map(pred):
     if K.ndim(pred) > 2:
         return K.map_fn(lambda x: recursive_map(x), pred, dtype=tf.float32)
     else:
-        return get_class_similarity(pred)
+        return get_class_similarity(pred, kgraph)
 
 def dk_loss(y_true, y_pred):
     img_height = y_true.shape[1]
