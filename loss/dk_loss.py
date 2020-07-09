@@ -8,7 +8,7 @@ import tensorflow.keras.backend as K
 from graph.knowledge_graph import *
 
 # labels for siftflow
-siftflow_labels = ["awning", "balcony", "bird", "boat", "bridge", "building", "bus", \
+siftflow_labels = ["void", "awning", "balcony", "bird", "boat", "bridge", "building", "bus", \
           "car", "cow", "crosswalk", "desert", "door", "fence", "field", \
           "grass", "moon", "mountain", "person", "plant", "pole", "river", \
           "road", "rock", "sand", "sea", "sidewalk", "sign", "sky", \

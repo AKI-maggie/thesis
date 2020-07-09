@@ -26,7 +26,7 @@ class SiftFlowLoader(DataLoader):
     def __init__(self, img_path, label_path, test_num = 200):
         super().__init__(img_path, label_path)
         self.test_num = test_num
-        self.class_num = 33
+        self.class_num = 34
 
         self.test_data = self.generate_testing_dataset()
         

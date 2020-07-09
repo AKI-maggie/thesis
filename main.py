@@ -15,6 +15,8 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 2
     print("### Start Training ###")
     best_performance = 0
     tolerance = 0
+    finished = False
+    history = []
     for i in range(n_iter):
         print("=======================================================")
         print("Training Procedure {0}".format(i+1))
@@ -33,7 +35,7 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 2
         del x_real
         del y_real
         time.sleep(0.1)
-        if i % 5 == 1 and not math.isnan(loss):
+        if i % 3 == 1 and not math.isnan(loss):
             print("Save new weight at iter {0}".format(i))
             print("Best performance: {0}".format(best_performance))
             print("Tolerance: {0}".format(tolerance))
@@ -42,11 +44,13 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 2
                 tolerance = 0
             elif best_performance - performance > 0.001:
                 tolerance += 1
-            if tolerance > 5:
+            if tolerance > 3:
                 print("Not progressing for too long time")
+                finished = True
                 break
             model.d_save()
     print("Discriminator Training complete.")
+    return finished, res.history['accuracy'], res.history['val_accuracy'], res.history['loss'], res.history['val_loss']
 
     # for i in range(n_iter):
     #     print("=======================================================")
