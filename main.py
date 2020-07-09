@@ -3,6 +3,7 @@ import os
 import math
 from tensorflow.keras.callbacks import LambdaCallback
 import numpy as np
+import time
 
 def train(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 24, batch_size=8, epochs=10):
     # model.load()
@@ -23,6 +24,7 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 2
         res = model.d_train(x_real, y_real, batch_size=batch_size, epochs=epochs, 
                     validation_data=data_loader.test_data)# callbacks = [LambdaCallback(on_epoch_end=lambda batch, logs: print(model.get_weights(-2)))])
         performance = np.average(res.history['val_accuracy'])
+        loss = res.history['val_loss'][-1]
         print("Average Performance: {0}".format(performance))
         # if i % 5 == 1 and not math.isnan(model.get_weights(-2)):
             # print("Save new weight at iter {0}".format(i))
@@ -30,8 +32,11 @@ def train(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 2
         # if i % 10 == 5 and not math.isnan(model.layers[-2].get_weights()[0][0][0][0][0]):
         del x_real
         del y_real
-        if i % 10 == 1:
+        time.sleep(0.1)
+        if i % 5 == 1 and not math.isnan(loss):
             print("Save new weight at iter {0}".format(i))
+            print("Best performance: {0}".format(best_performance))
+            print("Tolerance: {0}".format(tolerance))
             if best_performance < performance:
                 best_performance = performance
                 tolerance = 0
