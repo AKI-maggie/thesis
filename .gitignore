@@ -1,0 +1,5 @@
+# ignore all logs
+siftflow
+d.h5
+siftflow_similarity.txt
+TestSet1.txt

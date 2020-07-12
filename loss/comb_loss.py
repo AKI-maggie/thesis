@@ -2,6 +2,8 @@ import tensorflow as tf
 from tensorflow.keras.losses import categorical_crossentropy, CategoricalCrossentropy
 from loss.dk_loss import dk_loss
 import tensorflow.keras.backend as K
+from tensorflow.keras.layers import Add
+
 
 gamma = 1
 cce = CategoricalCrossentropy()
@@ -24,18 +26,17 @@ def generator_loss(y_true, y_pred):
 
 
 def combination_loss(y_true, y_pred):
-    mask = y_true[:, :, :, -1]
-    sum = 0
-    # fake data
-    sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(y_pred[:, :, :, -1] * tf.cast((mask == 1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==1), tf.float32))
-    # unlabeled data
-    sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(1-y_pred[:, :, :, -1] * tf.cast((mask == -1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==-1), tf.float32))
+    # mask = y_true[:, :, :, -1]
+    # sum = 0
+    # # fake data
+    # sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(y_pred[:, :, :, -1] * tf.cast((mask == 1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==1), tf.float32))
+    # # unlabeled data
+    # sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(1-y_pred[:, :, :, -1] * tf.cast((mask == -1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==-1), tf.float32))
+    # # K.print_tensor(sum, message='sum = ')
+    # # labeled data
+    # labeled_ypred = y_pred[:, :, :, :-1][mask == 0]
+    # labeled_ytrue = y_true[:, :, :, :-1][mask == 0]
+    sum = gamma * categorical_crossentropy(y_true, y_pred, from_logits=True)
     # K.print_tensor(sum, message='sum = ')
-    # labeled data
-    labeled_ypred = y_pred[:, :, :, :-1][mask == 0]
-    labeled_ytrue = y_true[:, :, :, :-1][mask == 0]
-    print(labeled_ytrue.shape)
-    sum += gamma * categorical_crossentropy(labeled_ytrue, labeled_ypred, from_logits=True)
-    # K.print_tensor(sum, message='sum = ')
-
-    return sum #+ 0.001 * dk_loss(y_true, y_pred)
+    sum = Add()([sum, 0.01 * dk_loss(y_true[:, :, :, :-1], y_pred[:, :, :, :-1])])
+    return sum

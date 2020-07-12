@@ -72,7 +72,7 @@ class CN_based_KnowledgeGraph(KnowledgeGraph):
 
     def _build_edges(self):
         self.progress.update_progress(0)
-        for i in range(len(self.nodes)-1):
+        for i in range(1, len(self.nodes)-1):
             for j in range(i+1, len(self.nodes)):
                 e = self.search_engine.check_edge(self.nodes[i], self.nodes[j])
                 if e:
@@ -86,7 +86,7 @@ class CN_based_KnowledgeGraph(KnowledgeGraph):
         r_matrix = np.zeros([len(self.nodes), len(self.nodes)])
         for i in range(self.prob_matrix.shape[0]):
             # set the starting vector
-            start = np.zeros(self.prob_matrix.shape[0])
+            start = np.zeros(self.prob_matrix.shape[1])
             start[i] = 1
             v = start.copy()
             # random walk
