@@ -9,6 +9,7 @@ from numpy.random import randint
 
 from models.generator import Generator
 from loss.dk_loss import *
+import os
 
 from math import ceil, floor
 

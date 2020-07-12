@@ -1,12 +1,11 @@
 import tensorflow as tf
-from tensorflow.keras.losses import categorical_crossentropy, CategoricalCrossentropy
+from tensorflow.keras.losses import categorical_crossentropy
 from loss.dk_loss import dk_loss
 import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Add
 
 
 gamma = 1
-cce = CategoricalCrossentropy()
 
 # def combination_loss(y_true, y_pred):
 #     class_num = y_true.shape[3]
