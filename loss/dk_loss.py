@@ -9,8 +9,13 @@ from tensorflow.keras.losses import KLDivergence
 from tensorflow.math import divide_no_nan
 from tensorflow.keras.layers import Add
 tf.compat.v1.enable_eager_execution()
-S = np.array([[1, 0.2, 0.5],[0.2, 1, 0.3],[0.5, 0.3,1]])
+siftflow_labels = ["void", "awning", "balcony", "bird", "boat", "bridge", "building", "bus", \
+          "car", "cow", "crosswalk", "desert", "door", "fence", "field", \
+          "grass", "moon", "mountain", "person", "plant", "pole", "river", \
+          "road", "rock", "sand", "sea", "sidewalk", "sign", "sky", \
+          "staircase", "streetlight", "sun", "tree", "window"]
 paddings = tf.constant([[1, 1,], [1, 1]])
+kgraph = CN_based_KnowledgeGraph(siftflow_labels, 0.15, 100, '/content/drive/My Drive/thesis/siftflow_similarity.txt')
 
 # This file contains the loss calculation function that is specified in the paper
 
@@ -20,7 +25,7 @@ def dk_distance(y_neighbor, y):
 def get_class_similarity(pred):
     pred = tf.cast(pred, tf.int64)
     
-    res = tf.gather_nd(S, pred)
+    res = tf.gather_nd(kgraph.get_similarity(), pred)
     res = tf.cast(res, tf.float32)
     return res
 
