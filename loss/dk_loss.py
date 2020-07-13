@@ -8,6 +8,8 @@ import numpy as np
 from tensorflow.keras.losses import KLDivergence
 from tensorflow.math import divide_no_nan
 from tensorflow.keras.layers import Add
+from graph.knowledge_graph import *
+
 tf.compat.v1.enable_eager_execution()
 siftflow_labels = ["void", "awning", "balcony", "bird", "boat", "bridge", "building", "bus", \
           "car", "cow", "crosswalk", "desert", "door", "fence", "field", \
