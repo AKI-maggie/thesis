@@ -122,9 +122,9 @@ class Kegan(BasicModel):
         # make weights in the discriminator not trainable
         self.d_model.trainable = False
         # connect image output from generator as input to discriminator
-        gan_output = self.d_model(self.g_model.output)
+        gan_output = self.d_model(self.g_model.model.get_layer('g_output').output)
         # define gan model as taking noise and outputting a classification
-        return Model(self.g_model.input, gan_output)
+        return Model(self.g_model.model.input, gan_output)
 
     def _build_g_model(self):
         return Generator(self.class_num, img_height=self.img_height, img_width=self.img_width)

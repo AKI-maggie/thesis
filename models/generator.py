@@ -10,7 +10,7 @@ class Generator(BasicModel):
                  img_height = 128,
                  img_width = 128,
                  save_path = './g.h5'):
-        super.__init__(save_path)
+        super().__init__(save_path)
         self.latent_dim = latent_dim
         self.img_height = img_height
         self.img_width = img_width
@@ -21,29 +21,29 @@ class Generator(BasicModel):
         # build the layers
         x = Sequential()
 
-        x.add(Dense(256 * 8 * 8, input_dim=self.latent_dim))
+        x.add(Dense(128 * 16 * 16, input_dim=self.latent_dim))
         x.add(LeakyReLU(alpha=0.2))
-        x.add(Reshape((8, 8, 256)))
+        x.add(Reshape((16, 16, 128)))
 
         # deconvolutional layer
-        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
-        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
-        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
-        x.add(Conv2DTranspose(2048, (4,4), strides=(2,2), padding='same'))
+        x.add(Conv2DTranspose(128, (4,4), strides=(2,2), padding='same'))
         x.add(BatchNormalization())
         x.add(LeakyReLU(alpha=0.2))
 
         # output layer
-        x.add(Conv2D(3, (3, 3), activation='tanh', padding='same'))
+        x.add(Conv2D(3, (3, 3), activation='tanh', padding='same', name='g_output'))
 
         return x
 
@@ -51,7 +51,7 @@ class Generator(BasicModel):
         return self.model.summary()
 
     # generate points in latent space as input for the generator
-    def generate_latent_points(self, n_samples, seed):
+    def generate_latent_points(self, n_samples, seed = None):
         if seed:
             np.random.seed(seed)
         # generate points in the latent space

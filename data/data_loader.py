@@ -3,6 +3,7 @@ import os
 import random
 from cv2 import imread, resize
 import scipy.io as io
+from numpy.random import randint
 
 # A prototype class which mentions basic data loading functions
 class DataLoader():
@@ -28,7 +29,7 @@ class SiftFlowLoader(DataLoader):
         self.test_num = test_num
         self.class_num = 34
 
-        self.test_data = self.generate_testing_dataset()
+        self.test_data = self.generate_testing_samples()
         
     def _load(self):
         for root, dirs, files in os.walk(self.img_p):
