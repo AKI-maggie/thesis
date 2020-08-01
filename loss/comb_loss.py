@@ -17,6 +17,11 @@ gamma = 1
 #     return tf.sum(tf.math.log(dx)) + \
 #            gamma * categorical_crossentropy(y_true[:, :, :, class_num], y_pred[:, :, :, class_num])
 
+def gan_activation(output):
+    logexpsum = K.sum(K.exp(output), axis=-1, keepdims=True)
+	result = logexpsum / (logexpsum + 1.0)
+	return result
+
 def generator_loss(y_true, y_pred):
     class_num = y_true.shape[3]
     dx = tf.math.abs(y_pred[:, :, :, class_num-1] - y_true[:, :, :, class_num-1])
@@ -25,6 +30,22 @@ def generator_loss(y_true, y_pred):
 
 
 def combination_loss(y_true, y_pred):
+    gan_mask = y_true[:, :, :, -1]
+
+    # find mask
+    fake_mask = tf.cast(K.equal(0, gan_mask), dtype=tf.float32)
+    label_mask = tf.cast(K.equal(1, gan_mask), dtype=tf.float32)
+    unlabel_mask = tf.cast(K.equal(2, gan_mask), dtype=tf.float32)
+
+    # calculate for unlabel data
+
+
+    # calculate for fake data
+
+
+    # calculate for label data
+    
+
     # mask = y_true[:, :, :, -1]
     # sum = 0
     # # fake data

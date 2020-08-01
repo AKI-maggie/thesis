@@ -48,12 +48,12 @@ class SiftFlowLoader(DataLoader):
         return True
 
     def separate_labels(self, lb, nc):
-        seg_lb = np.zeros((lb.shape[0], lb.shape[1], nc + 1))
+        seg_lb = np.zeros((lb.shape[0], lb.shape[1], nc))
         for i in range(nc):
             seg_lb[:,:,i] = (lb==i).astype(int)
         return seg_lb
 
-    def generate_training_batches(self,  
+    def generate_supervised_samples(self,  
                                   k = 1,   # k - number of shots for each class
                                   img_height = 256,
                                   img_width = 256):
@@ -61,7 +61,7 @@ class SiftFlowLoader(DataLoader):
             # randomly choose a batch of k images
             yield (self._generate_train(k, img_height, img_width))
 
-    def generate_testing_dataset(self, num = 10, 
+    def generate_testing_samples(self, num = 10, 
                                  img_height = 256,
                                  img_width = 256):
         img_ids = self.img_ids[-self.test_num:]
@@ -82,6 +82,19 @@ class SiftFlowLoader(DataLoader):
         
         return np.array(x_test), np.array(y_test)
 
+    def generate_real_samples(self, dataset, n_samples, seed = None):
+        imgs, labels = dataset
+        if seed:
+            np.random.seed(seed)
+        # choose random instances
+        idx = randint(0, imgs.shape[0], n_samples)
+        # load images and labels
+        x, y = imgs[idx], labels[idx]
+        # generate class labels
+        y2 = np.ones([n_samples, x.shape[1], x.shape[2]])
+        return [x, y], y2
+
+    # generate labeled training dataset
     def _generate_train(self, k, img_height, img_width): 
         # load images and corresponding labels
         img_ids = self.img_ids[:-self.test_num]
