@@ -15,9 +15,11 @@ def check_IoU(prediction, ground_true):
     return IoU_score
 
 def check_ca(prediction, ground_true):
-    cm = confusion_matrix(prediction, ground_true)
-    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    ca = cm.diagonal() / cm.diagonal().shape[0]
+    f_prediction = prediction.flatten()
+    f_ground_true = ground_true.flatten()
+    cm = confusion_matrix(f_prediction, f_ground_true)
+    cm = np.nan_to_num(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis])
+    ca = np.sum(cm.diagonal()) / cm.diagonal().shape[0]
     return ca
 
 def check_pa(prediction, ground_true):

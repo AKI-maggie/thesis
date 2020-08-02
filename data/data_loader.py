@@ -62,26 +62,46 @@ class SiftFlowLoader(DataLoader):
             # randomly choose a batch of k images
             yield (self._generate_train(k, img_height, img_width))
 
-    def generate_testing_samples(self, num = 10, 
+    def generate_testing_samples(self, k = 1, 
                                  img_height = 256,
                                  img_width = 256):
         img_ids = self.img_ids[-self.test_num:]
-        x_test = []
-        y_test = []
+        # load images and corresponding labels
+        images = []
+        labels = []
 
-        for fid in random.sample(img_ids, num):
+        counts = np.zeros(self.class_num)
+
+        for fid in random.sample(img_ids, len(img_ids)):
+            if self.check_datatset_completence(counts, k):
+                break
+            # print('Loading image of {0}'.format(fid))
+            
+            # load label
             flabel_path = fid + '.mat'
             flpath = os.path.join(self.label_p, flabel_path)
             flabel = resize(io.loadmat(flpath)['S'], (img_height, img_width))
-            flabel = self.separate_labels(flabel, self.class_num)
+            flabel_classes = np.unique(flabel)
 
-            fimg_path = fid + '.jpg'
-            fpath = os.path.join(self.img_p, fimg_path)
-            fimg = resize(imread(fpath) / 255, (img_height, img_width))
-            x_test.append(fimg)
-            y_test.append(flabel)
-        
-        return np.array(x_test), np.array(y_test)
+            flag = 0
+            for i in range(self.class_num):
+                if counts[i] < k and i in flabel_classes:
+                    counts[i] += 1
+                    
+                    if flag == 0:
+                        # load img
+                        fimg_path = fid + '.jpg'
+                        fpath = os.path.join(self.img_p, fimg_path)
+                        fimg = resize(imread(fpath) / 255, (img_height, img_width))
+                        images.append(fimg)
+                        labels.append(self.separate_labels(flabel, self.class_num))
+                        # labels.append(flabel)
+                        flag = 1
+
+        images = np.array(images)
+        labels = np.array(labels)
+        # print(images.shape)
+        return images, labels
 
     def generate_real_samples(self, dataset, n_samples, seed = None):
         imgs, labels = dataset

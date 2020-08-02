@@ -19,8 +19,8 @@ gamma = 1
 
 def gan_activation(output):
     logexpsum = K.sum(K.exp(output), axis=-1, keepdims=True)
-	result = logexpsum / (logexpsum + 1.0)
-	return result
+    result = logexpsum / (logexpsum + 1.0)
+    return result
 
 def generator_loss(y_true, y_pred):
     class_num = y_true.shape[3]
