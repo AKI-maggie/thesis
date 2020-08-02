@@ -38,20 +38,24 @@ class Kegan(BasicModel):
         # build descriminator
         self.c_model, self.d_model = self._build_d_model(use_pyramid)
         self.c_model.compile(loss=c_loss, optimizer = c_optimizer, metrics=c_metrics)
-        self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
+        # self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
 
-        # build generator
-        self.g_model = self._build_g_model()
+        # # build generator
+        # self.g_model = self._build_g_model()
 
-        # build gan structure
-        self.gan_model = self._build_gan()
-        self.gan_model.compile(loss=g_loss, optimizer=g_optimizer, metrics=g_metrics)
+        # # build gan structure
+        # self.gan_model = self._build_gan()
+        # self.gan_model.compile(loss=g_loss, optimizer=g_optimizer, metrics=g_metrics)
         
         # descriminator saving path
         if use_pyramid:
             self.c_save_path = os.path.join((os.path.split(save_path))[0], 's_d.h5')
         else:
             self.c_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
+        
+        # load weights
+        self.c_load()
+        
 
     def c_load(self, save_path=None):
         if save_path != None:
@@ -111,12 +115,9 @@ class Kegan(BasicModel):
         # save the generator model tile file
         # filename = 'generator_model_%03d.h5' % (epoch+1)
         # self.gan_model.save_weights(self.gan_save_path)
-    
-    def get_weights(self, layer_index):
-        return self.d_model.layers[layer_index].get_weights()[0][0][0][0][0]
 
     def predict(self, x):
-        return np.argmax(self.d_model.predict(x), axis=3)
+        return np.argmax(self.c_model.predict(x), axis=3)
 
     def _build_gan(self):
         # make weights in the discriminator not trainable
