@@ -36,7 +36,7 @@ class Kegan(BasicModel):
         self.class_num = class_num
 
         # build descriminator
-        self.c_model, self.d_model = self._build_d_model(use_pyramid)
+        self.c_model = self._build_d_model(use_pyramid)
         self.c_model.compile(loss=c_loss, optimizer = c_optimizer, metrics=c_metrics)
         # self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
 
@@ -245,7 +245,7 @@ class Kegan(BasicModel):
         # unsupervised model
         final_d = Lambda(gan_activation)(final)
 
-        return Model(img_input,final_c), Model(img_input, final_d)
+        return Model(img_input,final_c) #Model(img_input, final_d)
 
     def _build_ssp(self, feature_map, last_shape):
         print(last_shape)

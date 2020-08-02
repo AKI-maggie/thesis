@@ -39,9 +39,14 @@ def train(data_loader, model, n_iter = 100, epochs=10, n_batch=24, batch_size=8)
     # model.c_load()
     print("### Start Training ###")
     finished = False
-    history = []
+    a = np.array([])
+    b = np.array([])
+    c = np.array([])
+    d = np.array([])
     best_performance = 0
     tolerance = 0
+
+    rests
 	# manually enumerate epochs
     for i in range(n_iter):
         print("=======================================================")
@@ -86,8 +91,12 @@ def train(data_loader, model, n_iter = 100, epochs=10, n_batch=24, batch_size=8)
             print("Save new weight at iter {0}".format(i))
             model.c_save()
             model.gan_model.save_weights(model.save_path)
+        a = np.append(a, res.history['accuracy'])
+        b = np.append(b, res.history['val_accuracy'])
+        c = np.append(c, res.history['loss'])
+        d = np.append(d, res.history['val_loss'])
     print("Discriminator Training complete.")
-    return finished, res.history['accuracy'], res.history['val_accuracy'], res.history['loss'], res.history['val_loss']
+    return finished, a, b, c, d
 
 
 
@@ -101,7 +110,10 @@ def train_supervised(model, data_loader, checkpoint_path = './', n_iter = 5000, 
     best_performance = 0
     tolerance = 0
     finished = False
-    history = []
+    a = np.array([])
+    b = np.array([])
+    c = np.array([])
+    d = np.array([])
     for i in range(n_iter):
         print("=======================================================")
         print("Training Procedure {0}".format(i+1))
@@ -127,12 +139,16 @@ def train_supervised(model, data_loader, checkpoint_path = './', n_iter = 5000, 
             if best_performance < performance:
                 best_performance = performance
                 tolerance = 0
-            elif best_performance - performance > 0.001:
+            elif best_performance - performance > 0.01:
                 tolerance += 1
-            if tolerance > 3:
+            if tolerance > 1:
                 print("Not progressing for too long time")
                 finished = True
                 break
             model.c_save()
+        a = np.append(a, res.history['accuracy'])
+        b = np.append(b, res.history['val_accuracy'])
+        c = np.append(c, res.history['loss'])
+        d = np.append(d, res.history['val_loss'])
     print("Discriminator Training complete.")
-    return finished, res.history['accuracy'], res.history['val_accuracy'], res.history['loss'], res.history['val_loss']
+    return finished, a, b, c, d
