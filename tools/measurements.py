@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import confusion_matrix
 
 # Add IoU score ca
 # culation to the prediction comparation of the testing data
@@ -12,3 +13,12 @@ def check_IoU(prediction, ground_true):
 #     print(intersection)
 #     print(union)
     return IoU_score
+
+def check_ca(prediction, ground_true):
+    cm = confusion_matrix(prediction, ground_true)
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    ca = cm.diagonal() / cm.diagonal().shape[0]
+    return ca
+
+def check_pa(prediction, ground_true):
+    return (prediction == ground_true).mean()
