@@ -30,33 +30,7 @@ def generator_loss(y_true, y_pred):
 
 
 def combination_loss(y_true, y_pred):
-    gan_mask = y_true[:, :, :, -1]
-
-    # find mask
-    fake_mask = tf.cast(K.equal(0, gan_mask), dtype=tf.float32)
-    label_mask = tf.cast(K.equal(1, gan_mask), dtype=tf.float32)
-    unlabel_mask = tf.cast(K.equal(2, gan_mask), dtype=tf.float32)
-
-    # calculate for unlabel data
-
-
-    # calculate for fake data
-
-
-    # calculate for label data
-    
-
-    # mask = y_true[:, :, :, -1]
-    # sum = 0
-    # # fake data
-    # sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(y_pred[:, :, :, -1] * tf.cast((mask == 1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==1), tf.float32))
-    # # unlabeled data
-    # sum -= tf.math.divide_no_nan(tf.reduce_sum(tf.math.log(1-y_pred[:, :, :, -1] * tf.cast((mask == -1), tf.float32))), tf.cast(tf.math.count_nonzero(mask==-1), tf.float32))
-    # # K.print_tensor(sum, message='sum = ')
-    # # labeled data
-    # labeled_ypred = y_pred[:, :, :, :-1][mask == 0]
-    # labeled_ytrue = y_true[:, :, :, :-1][mask == 0]
     sum = gamma * categorical_crossentropy(y_true, y_pred, from_logits=True)
     # K.print_tensor(sum, message='sum = ')
-    sum = Add()([sum, 0.01 * dk_loss(y_true[:, :, :, :-1], y_pred[:, :, :, :-1])])
+    sum = Add()([sum, 0.01 * dk_loss(y_true, y_pred)])
     return sum

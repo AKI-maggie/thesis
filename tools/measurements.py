@@ -9,7 +9,7 @@ def check_IoU(prediction, ground_true):
     f_ground_true = ground_true.flatten()
 #     print(prediction)
 #     print(ground_true)
-    return jaccard_score(f_ground_true, f_prediction) * 100
+    return jaccard_score(f_ground_true, f_prediction, average='micro') * 100
 
 def check_ca(prediction, ground_true):
     f_prediction = prediction.flatten()
