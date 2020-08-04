@@ -183,7 +183,7 @@ class CityScapeLoader(DataLoader):
         self.test_num = test_num
         self.class_num = 20
 
-        self.test_data = self.generate_testing_samples()
+        self.test_data = self.generate_testing_samples(k=3)
 
         # a data-loading class for SiftFlow data
         

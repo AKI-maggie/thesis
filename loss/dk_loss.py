@@ -11,13 +11,20 @@ from tensorflow.keras.layers import Add
 from graph.knowledge_graph import *
 
 tf.compat.v1.enable_eager_execution()
+# siftflow
 siftflow_labels = ["void", "awning", "balcony", "bird", "boat", "bridge", "building", "bus", \
           "car", "cow", "crosswalk", "desert", "door", "fence", "field", \
           "grass", "moon", "mountain", "person", "plant", "pole", "river", \
           "road", "rock", "sand", "sea", "sidewalk", "sign", "sky", \
           "staircase", "streetlight", "sun", "tree", "window"]
+
+# cityscape
+cityscape_labels = ['unlabeled', 'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light',\
+                 'traffic sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus',\
+                'train', 'motorcycle', 'bicycle']
+
+kgraph = CN_based_KnowledgeGraph(cityscape_labels, 0.15, 100, '/content/drive/My Drive/thesis/siftflow_similarity2.txt')
 paddings = tf.constant([[1, 1,], [1, 1]])
-kgraph = CN_based_KnowledgeGraph(siftflow_labels, 0.15, 100, '/content/drive/My Drive/thesis/siftflow_similarity.txt')
 
 # This file contains the loss calculation function that is specified in the paper
 
