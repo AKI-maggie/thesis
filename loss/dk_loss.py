@@ -23,7 +23,13 @@ cityscape_labels = ['unlabeled', 'road', 'sidewalk', 'building', 'wall', 'fence'
                  'traffic sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus',\
                 'train', 'motorcycle', 'bicycle']
 
-kgraph = CN_based_KnowledgeGraph(cityscape_labels, 0.15, 100, '/content/drive/My Drive/thesis/siftflow_similarity2.txt')
+# camvid
+camvid_labels = ['animal','archway','bicyclist','bridge','building','car','pram','child','column',
+                'fence','drive','lane','text','scooter','others','parking','pedestrian','road','shoulder',
+                'sidewalk','sign','sky','suv','traffic cone','traffic light','train','tree','truck',
+                'tunnel', 'vegetation','void','wall']
+
+kgraph = CN_based_KnowledgeGraph(camvid_labels, 0.15, 100, '/content/drive/My Drive/thesis/siftflow_similarity3.txt')
 paddings = tf.constant([[1, 1,], [1, 1]])
 
 # This file contains the loss calculation function that is specified in the paper

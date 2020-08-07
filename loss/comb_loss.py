@@ -32,5 +32,5 @@ def generator_loss(y_true, y_pred):
 def combination_loss(y_true, y_pred):
     sum = gamma * categorical_crossentropy(y_true, y_pred, from_logits=True)
     # K.print_tensor(sum, message='sum = ')
-    sum = Add()([sum, 0.01 * dk_loss(y_true, y_pred)])
+    sum = Add()([sum, 0.001 * dk_loss(y_true, y_pred)])
     return sum
