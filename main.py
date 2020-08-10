@@ -84,7 +84,7 @@ def train(data_loader, model, n_iter = 100, epochs=10, n_batch=24, batch_size=8)
                 tolerance = 0
             elif best_performance - performance < 0.001:
                 tolerance += 1
-            if tolerance > 3:
+            if tolerance > 1:
                 print("Not progressing for too long time")
                 finished = True
                 break
