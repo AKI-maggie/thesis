@@ -166,7 +166,7 @@ class Kegan(BasicModel):
             conv7 = self._build_ssp(conv7, conv7.shape[1])
 
         if use_rccm:
-            rccm = self._use_rccm(conv7)
+            rccm = self.__build_rccm(conv7)
             conv7 = rccm(conv7)
             conv7 = rccm(conv7)
 
