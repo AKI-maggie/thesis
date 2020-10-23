@@ -6,6 +6,8 @@ from tensorflow.keras.applications.resnet import *
 from tensorflow.keras.models import *
 from tensorflow.keras.optimizers import *
 from numpy.random import randint
+from keras import backend as K
+
 
 from models.generator import Generator
 from loss.dk_loss import *
@@ -26,7 +28,8 @@ class Kegan(BasicModel):
                  d_metrics = ['accuracy'],
                  g_metrics = ['accuracy'],
                  save_path='./kagan.h5', fcn_level = 32,
-                 use_pyramid = True):
+                 use_pyramid = True,
+                 use_rccm = True):
 
         # set basic configuration variables
         super().__init__(save_path)
@@ -36,7 +39,7 @@ class Kegan(BasicModel):
         self.class_num = class_num
 
         # build descriminator
-        self.c_model = self._build_d_model(use_pyramid)
+        self.c_model = self._build_d_model(use_pyramid, use_rccm)
         self.c_model.compile(loss=c_loss, optimizer = c_optimizer, metrics=c_metrics)
         # self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
 
@@ -52,7 +55,13 @@ class Kegan(BasicModel):
             self.c_save_path = os.path.join((os.path.split(save_path))[0], 's_d.h5')
         else:
             self.c_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
-        
+
+        if use_rccm:
+            self.c_save_path = os.path.join((os.path.split(save_path))[0], 'rccm_d.h5')
+            self.rccm_p = tf.zeros([1])
+        else:
+            self.c_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
+
         # load weights
         self.c_load()
         
@@ -130,7 +139,7 @@ class Kegan(BasicModel):
     def _build_g_model(self):
         return Generator(self.class_num, img_height=self.img_height, img_width=self.img_width)
 
-    def _build_d_model(self, use_pyramid):
+    def _build_d_model(self, use_pyramid, use_rccm):
         img_input = Input(shape=(self.img_height, self.img_width, 3))
         
         # use Res50 as base model
@@ -155,6 +164,11 @@ class Kegan(BasicModel):
 
         if use_pyramid:
             conv7 = self._build_ssp(conv7, conv7.shape[1])
+
+        if use_rccm:
+            rccm = self._use_rccm(conv7)
+            conv7 = rccm(conv7)
+            conv7 = rccm(conv7)
 
         # upsampling
         conv7_upsampling = Conv2DTranspose(name='conv7_upsampling',
@@ -285,4 +299,58 @@ class Kegan(BasicModel):
         # concat
         result = Concatenate(axis=3)([feature_map, up_bin1, up_bin2, up_bin3, up_bin4])
         return result
+
+    def __build_rccm(self, curr_layer):
+        p = tf.zeros([1])
+        m_input = Input(shape=curr_layer.shape[1:])
+        # print(curr_layer.shape)
+        m_batchsize, height, width, dim = curr_layer.shape
+        q = Conv2D(name='cca_conv_q', activation='relu',kernel_size=1, padding='same',filters=dim//8)(m_input)
+        qh = K.permute_dimensions(q, (0, 2, 3, 1))
+        qh = tf.reshape(qh, [-1, dim//8, height])
+        qh = K.permute_dimensions(qh, (0, 2, 1))
+        qw = K.permute_dimensions(q, (0, 1, 3, 2))
+        qw = tf.reshape (qw, [-1, dim//8, width])
+        qw = K.permute_dimensions(qw, (0, 2, 1))
+
+        # print(qw.shape)
+
+        k = Conv2D(name='cca_conv_k', activation='relu',kernel_size=1, padding='same',filters=dim//8)(m_input)
+        kh = K.permute_dimensions(k, (0, 2, 3, 1))
+        kh = tf.reshape (kh, [-1, dim//8, height])
+        kw = K.permute_dimensions(k, (0, 1, 3, 2))
+        kw = tf.reshape (kw, [-1, dim//8, width])
+
+        # print(kw.shape)
+
+        v = Conv2D(name='cca_conv_v', activation='relu',kernel_size=1, padding='same',filters=dim)(m_input)
+        vh = K.permute_dimensions(v, (0, 2, 3, 1))
+        vh = tf.reshape(vh, [-1, dim, height])
+        vw = K.permute_dimensions(v, (0, 1, 3, 2))
+        vw = tf.reshape (vw, [-1, dim, width])
+
+        energy_h = tf.matmul(qh, kh)
+        energy_h= tf.reshape(energy_h, [-1, width, height, height])
+        energy_h = K.permute_dimensions(energy_h, (0,2,1,3))
+        energy_w = tf.matmul(qw, kw)
+        energy_w = tf.reshape(energy_w, [-1, height, width, width])
+
+        concat = tf.concat([energy_h, energy_w], 3, name="energy_concat")
+        concat = (Activation('softmax'))(concat)
+
+        atth = K.permute_dimensions(concat[:, :, :, 0:height], (0,2,1,3))
+        atth = tf.reshape(atth, [-1, height, height])
+        attw = tf.reshape(concat[:, :, :, height:height+width], [-1, width, width])
+
+        outh = tf.matmul(vh, K.permute_dimensions(atth, (0,2,1)))
+        outh = K.permute_dimensions(tf.reshape(outh, [-1, width, dim, height]), (0,3,1,2))
+        outw = tf.matmul(vw, K.permute_dimensions(attw, (0,2,1)))
+        outw = K.permute_dimensions(tf.reshape(outw, [-1, height, dim, width]), (0,1,3,2))
+
+        outh = tf.cast(outh, tf.float32)
+        outw = tf.cast(outw, tf.float32)
+        m_input = tf.cast(m_input, tf.float32)
+        final = p*(outh+outw)+m_input
+        t = Model(m_input, final)
+        return t
 
