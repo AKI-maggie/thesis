@@ -271,20 +271,24 @@ class SiftFlowLoader(DataLoader):
             flabel_path = fid + '.mat'
             flpath = os.path.join(self.label_p, flabel_path)
             flabel = resize(io.loadmat(flpath)['S'], (img_height, img_width))
+            fflabel = np.fliplr(flabel)
             flabel_classes = np.unique(flabel)
 
             flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
-                    counts[i] += 1
+                    counts[i] += 2
                     
                     if flag == 0:
                         # load img
                         fimg_path = fid + '.jpg'
                         fpath = os.path.join(self.img_p, fimg_path)
                         fimg = resize(imread(fpath) / 255, (img_height, img_width))
+                        ffimg = np.fliplr(fimg)
                         images.append(fimg)
+                        images.append(ffimg)
                         labels.append(self.separate_labels(flabel, self.class_num))
+                        labels.append(self.separate_labels(fflabel, self.class_num))
                         # labels.append(flabel)
                         flag = 1
 
