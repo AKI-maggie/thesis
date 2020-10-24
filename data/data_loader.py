@@ -88,19 +88,16 @@ class CamVidLoader(DataLoader):
             flabel_classes = np.unique(flabel)
             flabel = self.separate_labels(flabel, self.class_num)
 
-            flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
                     counts[i] += 1
                     
-                    if flag == 0:
-                        # load img
-                        fimg_path = fid + '.png'
-                        fpath = os.path.join(self.img_p, fimg_path)
-                        fimg = resize(imread(fpath)/255, (img_height, img_width))
-                        images.append(fimg)
-                        labels.append(flabel)
-                        flag = 1
+                    # load img
+                    fimg_path = fid + '.png'
+                    fpath = os.path.join(self.img_p, fimg_path)
+                    fimg = resize(imread(fpath)/255, (img_height, img_width))
+                    images.append(fimg)
+                    labels.append(flabel)
 
         images = np.array(images)
         labels = np.array(labels)
@@ -140,19 +137,16 @@ class CamVidLoader(DataLoader):
             flabel_classes = np.unique(flabel)
             flabel = self.separate_labels(flabel, self.class_num)
 
-            flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
                     counts[i] += 1
-                    
-                    if flag == 0:
-                        # load img
-                        fimg_path = fid + '.png'
-                        fpath = os.path.join(self.img_p, fimg_path)
-                        fimg = resize(imread(fpath)/255, (img_height, img_width))
-                        images.append(fimg)
-                        labels.append(flabel)
-                        flag = 1
+                
+                    # load img
+                    fimg_path = fid + '.png'
+                    fpath = os.path.join(self.img_p, fimg_path)
+                    fimg = resize(imread(fpath)/255, (img_height, img_width))
+                    images.append(fimg)
+                    labels.append(flabel)
 
         images = np.array(images)
         labels = np.array(labels)
@@ -221,20 +215,17 @@ class SiftFlowLoader(DataLoader):
             flabel = resize(io.loadmat(flpath)['S'], (img_height, img_width))
             flabel_classes = np.unique(flabel)
 
-            flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
                     counts[i] += 1
                     
-                    if flag == 0:
-                        # load img
-                        fimg_path = fid + '.jpg'
-                        fpath = os.path.join(self.img_p, fimg_path)
-                        fimg = resize(imread(fpath) / 255, (img_height, img_width))
-                        images.append(fimg)
-                        labels.append(self.separate_labels(flabel, self.class_num))
-                        # labels.append(flabel)
-                        flag = 1
+                    # load img
+                    fimg_path = fid + '.jpg'
+                    fpath = os.path.join(self.img_p, fimg_path)
+                    fimg = resize(imread(fpath) / 255, (img_height, img_width))
+                    images.append(fimg)
+                    labels.append(self.separate_labels(flabel, self.class_num))
+                    # labels.append(flabel)
 
         images = np.array(images)
         labels = np.array(labels)
@@ -274,23 +265,23 @@ class SiftFlowLoader(DataLoader):
             fflabel = np.fliplr(flabel)
             flabel_classes = np.unique(flabel)
 
-            flag = 0
+            # flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
                     counts[i] += 2
                     
-                    if flag == 0:
-                        # load img
-                        fimg_path = fid + '.jpg'
-                        fpath = os.path.join(self.img_p, fimg_path)
-                        fimg = resize(imread(fpath) / 255, (img_height, img_width))
-                        ffimg = np.fliplr(fimg)
-                        images.append(fimg)
-                        images.append(ffimg)
-                        labels.append(self.separate_labels(flabel, self.class_num))
-                        labels.append(self.separate_labels(fflabel, self.class_num))
-                        # labels.append(flabel)
-                        flag = 1
+                    # if flag == 0:
+                    # load img
+                    fimg_path = fid + '.jpg'
+                    fpath = os.path.join(self.img_p, fimg_path)
+                    fimg = resize(imread(fpath) / 255, (img_height, img_width))
+                    ffimg = np.fliplr(fimg)
+                    images.append(fimg)
+                    images.append(ffimg)
+                    labels.append(self.separate_labels(flabel, self.class_num))
+                    labels.append(self.separate_labels(fflabel, self.class_num))
+                    # labels.append(flabel)
+                        # flag = 1
 
         images = np.array(images)
         labels = np.array(labels)
@@ -409,20 +400,17 @@ class CityScapeLoader(DataLoader):
             flabel_classes = np.unique(flabel)
             flabel = self.separate_labels(flabel, self.class_num)
 
-            flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
                     counts[i] += 1
-                    
-                    if flag == 0:
-                        # load img
-                        fimg_path = '{0}.jpg'.format(id+1)
-                        fpath = os.path.join(self.img_p, fimg_path)
-                        fimg = (imread(fpath) / 255)[:, :256, :]
-                        images.append(fimg)
-                        labels.append(flabel)
-                        # labels.append(flabel)
-                        flag = 1
+                
+                    # load img
+                    fimg_path = '{0}.jpg'.format(id+1)
+                    fpath = os.path.join(self.img_p, fimg_path)
+                    fimg = (imread(fpath) / 255)[:, :256, :]
+                    images.append(fimg)
+                    labels.append(flabel)
+                    # labels.append(flabel)
 
         images = np.array(images)
         labels = np.array(labels)
@@ -462,20 +450,17 @@ class CityScapeLoader(DataLoader):
             flabel_classes = np.unique(flabel)
             flabel = self.separate_labels(flabel, self.class_num)
 
-            flag = 0
             for i in range(self.class_num):
                 if counts[i] < k and i in flabel_classes:
                     counts[i] += 1
-                    
-                    if flag == 0:
-                        # load img
-                        fimg_path = '{0}.jpg'.format(id+1)
-                        fpath = os.path.join(self.img_p, fimg_path)
-                        fimg = (imread(fpath) / 255)[:, :256, :]
-                        images.append(fimg)
-                        labels.append(flabel)
-                        # labels.append(flabel)
-                        flag = 1
+                
+                    # load img
+                    fimg_path = '{0}.jpg'.format(id+1)
+                    fpath = os.path.join(self.img_p, fimg_path)
+                    fimg = (imread(fpath) / 255)[:, :256, :]
+                    images.append(fimg)
+                    labels.append(flabel)
+                    # labels.append(flabel)
 
         images = np.array(images)
         labels = np.array(labels)
