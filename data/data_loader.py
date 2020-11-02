@@ -183,7 +183,7 @@ class SiftFlowLoader(DataLoader):
     def separate_labels(self, lb, nc):
         seg_lb = np.zeros((lb.shape[0], lb.shape[1], nc))
         for i in range(nc):
-            seg_lb[:,:,i] = (lb==i).astype(int)
+            seg_lb[:,:,i] = (lb==[i,i,i]).astype(int)
         return seg_lb
 
     def generate_supervised_samples(self,  
