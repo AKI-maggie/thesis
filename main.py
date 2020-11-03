@@ -100,7 +100,7 @@ def train(data_loader, model, n_iter = 100, epochs=10, n_batch=24, batch_size=8)
 
 
 
-def train_supervised(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 24, batch_size=8, epochs=10):
+def train_supervised(model, data_loader, checkpoint_path = './', n_iter = 5000, n_batch = 1, batch_size=8, epochs=10):
     # model.load()
 
     # prepare training data loader
