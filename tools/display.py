@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 
 import matplotlib.pyplot as plt
-from tools.measurements import check_IoU
+from tools.measurements import check_IoU, check_ca, check_pa
 
 # functions used for display some predicting results
 
@@ -28,6 +28,8 @@ def rgb2gray(rgb):
 # output the original images, the predictions, and the label images
 def show_results(test_data, test_predicts, test_labels, n_classes):
     # store all ious for late miou
+    cas = []
+    pas = []
     ious = []
     
     for i in range(len(test_data)):
@@ -65,13 +67,21 @@ def show_results(test_data, test_predicts, test_labels, n_classes):
         
         plt.show()
         
-        
+        ca = check_ca(seg, segtest)
+        pa = check_pa(seg, segtest)
         iou = check_IoU(seg, segtest)
+        print("CA result: %.2f%%" % ca)
+        print("PA result: %.2f%%" % pa)
         print("IoU result: %.2f%%" % iou)
-        
+        cas.append(ca)
+        pas.append(pa)
         ious.append(iou)
     
     # calculate mIoU
+    mca = sum(cas)/len(cas)
+    mpa = sum(pas)/len(pas)
     miou = sum(ious)/len(ious)
+    print("\nmCA: %.2f%%\n"%mca)
+    print("\nmPA: %.2f%%\n"%mpa)
     print("\nmIoU: %.2f%%\n"%miou)
         

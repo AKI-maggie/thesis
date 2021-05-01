@@ -6,22 +6,30 @@ from tensorflow.keras.applications.resnet import *
 from tensorflow.keras.models import *
 from tensorflow.keras.optimizers import *
 from numpy.random import randint
+from keras import backend as K
+
 
 from models.generator import Generator
 from loss.dk_loss import *
+from loss.comb_loss import gan_activation
 import os
 
 from math import ceil, floor
 
 class Kegan(BasicModel):
     def __init__(self, img_height, img_width, class_num, 
-                 d_optimizer, 
+                 c_optimizer, 
+                 d_optimizer,
                  g_optimizer,
-                 d_loss = 'categorical_crossentropy', 
+                 c_loss = 'categorical_crossentropy', 
                  g_loss = 'binary_crossentropy',
-                 d_metrics = ['accuracy'], 
+                 d_loss = 'binary_crossentropy',
+                 c_metrics = ['accuracy'], 
+                 d_metrics = ['accuracy'],
+                 g_metrics = ['accuracy'],
                  save_path='./kagan.h5', fcn_level = 32,
-                 use_pyramid = True):
+                 use_pyramid = True,
+                 use_rccm = True):
 
         # set basic configuration variables
         super().__init__(save_path)
@@ -31,41 +39,47 @@ class Kegan(BasicModel):
         self.class_num = class_num
 
         # build descriminator
-        self.d_model = self._build_d_model(use_pyramid)
-        self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
+        self.c_model = self._build_d_model(use_pyramid, use_rccm)
+        self.c_model.compile(loss=c_loss, optimizer = c_optimizer, metrics=c_metrics)
+        # self.d_model.compile(loss=d_loss, optimizer = d_optimizer, metrics=d_metrics)
 
-        # build generator
+        # # build generator
         # self.g_model = self._build_g_model()
 
-        # build gan structure
-        # self.gan_model = self._build_gan(self.d_model)
-        # self.gan_model.compile(loss=g_loss, optimizer = g_optimizer)
-
+        # # build gan structure
+        # self.gan_model = self._build_gan()
+        # self.gan_model.compile(loss=g_loss, optimizer=g_optimizer, metrics=g_metrics)
+        
         # descriminator saving path
         if use_pyramid:
-            self.d_save_path = os.path.join((os.path.split(save_path))[0], 's_d.h5')
+            self.c_save_path = os.path.join((os.path.split(save_path))[0], 's_d.h5')
         else:
-            self.d_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
-        # gan model saving path
-        # self.gan_save_path = os.path.join((os.path.split(save_path))[0], 'gan.h5')
+            self.c_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
 
-    def d_load(self, save_path=None):
-        if save_path != None:
-            self.d_model.load_weights(save_path)
-            # save the new weights in its saving path
-            self.d_save()
+        if use_rccm:
+            self.c_save_path = os.path.join((os.path.split(save_path))[0], 'rccm_d.h5')
+            self.rccm_p = tf.zeros([1])
         else:
-            if os.path.exists(self.d_save_path):
+            self.c_save_path = os.path.join((os.path.split(save_path))[0], 'd.h5')
+
+        # load weights
+        self.c_load()
+        
+
+    def c_load(self, save_path=None):
+        if save_path != None:
+            self.c_model.load_weights(save_path)
+            # save the new weights in its saving path
+            self.c_save()
+        else:
+            if os.path.exists(self.c_save_path):
                 print("Pretrained weights found")
-                self.d_model.load_weights(self.d_save_path)
+                self.c_model.load_weights(self.c_save_path)
             else:
                 print("Pretrained weights not found")
 
-    def d_save(self):
-        self.d_model.save_weights(self.d_save_path)
-
-    def d_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
-        return self.d_model.fit(x, y, batch_size=batch_size, epochs=epochs, validation_data=validation_data, callbacks=callbacks)
+    def c_save(self):
+        self.c_model.save_weights(self.c_save_path)
 
     def gan_train(self, x, y, batch_size=20, epochs=10, validation_data=None, callbacks = []):
         bat_per_epo = int(x.shape[0] / batch_size)
@@ -110,26 +124,22 @@ class Kegan(BasicModel):
         # save the generator model tile file
         # filename = 'generator_model_%03d.h5' % (epoch+1)
         # self.gan_model.save_weights(self.gan_save_path)
-    
-    def get_weights(self, layer_index):
-        return self.d_model.layers[layer_index].get_weights()[0][0][0][0][0]
 
     def predict(self, x):
-        return np.argmax(self.d_model.predict(x), axis=3)
+        return np.argmax(self.c_model.predict(x), axis=3)
 
-    def _build_gan(self, d_model):
-        d_model.trainable = False
-        # connect
-        model = Sequential()
-        model.add(self.g_model.model)
-        model.add(d_model)
-
-        return model
+    def _build_gan(self):
+        # make weights in the discriminator not trainable
+        self.d_model.trainable = False
+        # connect image output from generator as input to discriminator
+        gan_output = self.d_model(self.g_model.model.get_layer('g_output').output)
+        # define gan model as taking noise and outputting a classification
+        return Model(self.g_model.model.input, gan_output)
 
     def _build_g_model(self):
         return Generator(self.class_num, img_height=self.img_height, img_width=self.img_width)
 
-    def _build_d_model(self, use_pyramid):
+    def _build_d_model(self, use_pyramid, use_rccm):
         img_input = Input(shape=(self.img_height, self.img_width, 3))
         
         # use Res50 as base model
@@ -155,9 +165,14 @@ class Kegan(BasicModel):
         if use_pyramid:
             conv7 = self._build_ssp(conv7, conv7.shape[1])
 
+        if use_rccm:
+            rccm = self.__build_rccm(conv7)
+            conv7 = rccm(conv7)
+            conv7 = rccm(conv7)
+
         # upsampling
         conv7_upsampling = Conv2DTranspose(name='conv7_upsampling',
-                                            filters=self.class_num+1,
+                                            filters=self.class_num,
                                             kernel_size=4,
                                             strides=4,
                                             use_bias=False,
@@ -165,7 +180,7 @@ class Kegan(BasicModel):
                                             )(conv7)
 
         fcn32 = Conv2DTranspose(name='final_model32',
-                                        filters=self.class_num+1,
+                                        filters=self.class_num,
                                         kernel_size=8,
                                         strides=8,
                                         use_bias=False,
@@ -173,8 +188,12 @@ class Kegan(BasicModel):
                                         )(conv7_upsampling)
                     
         if self.fcn_level == 32:  # return at fcn level 32
-            fcn32 = (Activation('softmax'))(fcn32)
-            return Model(img_input,fcn32)
+            # supervised model
+            fcn32_c = (Activation('softmax'))(fcn32)
+            # unsupervised model
+            fcn32_d = Lambda(gan_activation)(fcn32)
+
+            return Model(img_input,fcn32_c), Model(img_input, fcn32_d)
 
         # FCN-16 addition
         # upsampling2
@@ -182,13 +201,13 @@ class Kegan(BasicModel):
 
         pool4_upsampling = Conv2D(name='pool4_upsampling',
                                     activation='relu',
-                                    filters=self.class_num+1,
+                                    filters=self.class_num,
                                     kernel_size=1,
                                     padding='same',
                                     data_format='channels_last'
                                     )(y)
         pool4_upsampling2 = Conv2DTranspose(name='pool4_upsampling2',
-                                            filters=self.class_num+1,
+                                            filters=self.class_num,
                                             kernel_size=2,
                                             strides=2,
                                             use_bias=False,
@@ -198,21 +217,26 @@ class Kegan(BasicModel):
         if self.fcn_level == 16:  # return at fcn level 16
             fcn16 = Add(name='fcn_addition16')([pool4_upsampling2, conv7_upsampling])
             fcn16 = Conv2DTranspose(name='final_model16',
-                                    filters=self.class_num+1,
+                                    filters=self.class_num,
                                     kernel_size=8,
                                     strides=8,
                                     use_bias=False,
                                     data_format='channels_last'
                                     )(fcn16)
-            fcn16 = (Activation('softmax'))(fcn16)
-            return Model(img_input,fcn16)
+
+            # supervised model
+            fcn16_c = (Activation('softmax'))(fcn16)
+            # unsupervised model
+            fcn16_d = Lambda(gan_activation)(fcn16)
+
+            return Model(img_input,fcn16_c), Model(img_input, fcn16_d)
 
         # FCN-8 addition
         # upsampling3
         z = base_model.get_layer('conv3_block3_out').output
         pool3_upsampling = Conv2D(name='pool3_upsampling',
                                     activation='relu',
-                                    filters=self.class_num+1,
+                                    filters=self.class_num,
                                     kernel_size=1,
                                     padding='same',
                                     data_format='channels_last'
@@ -223,16 +247,19 @@ class Kegan(BasicModel):
         # upsampling4
 
         final = Conv2DTranspose(name='final_model8',
-                                filters=self.class_num+1,
+                                filters=self.class_num,
                                 kernel_size=8,
                                 strides=8,
                                 use_bias=False,
                                 data_format='channels_last'
                                 )(fcn8)
 
-        final = (Activation('softmax'))(final)
+        # supervised model
+        final_c = (Activation('softmax'))(final)
+        # unsupervised model
+        final_d = Lambda(gan_activation)(final)
 
-        return Model(img_input,final)  # return at fcn level 8
+        return Model(img_input,final_c) #Model(img_input, final_d)
 
     def _build_ssp(self, feature_map, last_shape):
         print(last_shape)
@@ -272,4 +299,58 @@ class Kegan(BasicModel):
         # concat
         result = Concatenate(axis=3)([feature_map, up_bin1, up_bin2, up_bin3, up_bin4])
         return result
+
+    def __build_rccm(self, curr_layer):
+        p = tf.zeros([1])
+        m_input = Input(shape=curr_layer.shape[1:])
+        # print(curr_layer.shape)
+        m_batchsize, height, width, dim = curr_layer.shape
+        q = Conv2D(name='cca_conv_q', activation='relu',kernel_size=1, padding='same',filters=dim//8)(m_input)
+        qh = K.permute_dimensions(q, (0, 2, 3, 1))
+        qh = tf.reshape(qh, [-1, dim//8, height])
+        qh = K.permute_dimensions(qh, (0, 2, 1))
+        qw = K.permute_dimensions(q, (0, 1, 3, 2))
+        qw = tf.reshape (qw, [-1, dim//8, width])
+        qw = K.permute_dimensions(qw, (0, 2, 1))
+
+        # print(qw.shape)
+
+        k = Conv2D(name='cca_conv_k', activation='relu',kernel_size=1, padding='same',filters=dim//8)(m_input)
+        kh = K.permute_dimensions(k, (0, 2, 3, 1))
+        kh = tf.reshape (kh, [-1, dim//8, height])
+        kw = K.permute_dimensions(k, (0, 1, 3, 2))
+        kw = tf.reshape (kw, [-1, dim//8, width])
+
+        # print(kw.shape)
+
+        v = Conv2D(name='cca_conv_v', activation='relu',kernel_size=1, padding='same',filters=dim)(m_input)
+        vh = K.permute_dimensions(v, (0, 2, 3, 1))
+        vh = tf.reshape(vh, [-1, dim, height])
+        vw = K.permute_dimensions(v, (0, 1, 3, 2))
+        vw = tf.reshape (vw, [-1, dim, width])
+
+        energy_h = tf.matmul(qh, kh)
+        energy_h= tf.reshape(energy_h, [-1, width, height, height])
+        energy_h = K.permute_dimensions(energy_h, (0,2,1,3))
+        energy_w = tf.matmul(qw, kw)
+        energy_w = tf.reshape(energy_w, [-1, height, width, width])
+
+        concat = tf.concat([energy_h, energy_w], 3, name="energy_concat")
+        concat = (Activation('softmax'))(concat)
+
+        atth = K.permute_dimensions(concat[:, :, :, 0:height], (0,2,1,3))
+        atth = tf.reshape(atth, [-1, height, height])
+        attw = tf.reshape(concat[:, :, :, height:height+width], [-1, width, width])
+
+        outh = tf.matmul(vh, K.permute_dimensions(atth, (0,2,1)))
+        outh = K.permute_dimensions(tf.reshape(outh, [-1, width, dim, height]), (0,3,1,2))
+        outw = tf.matmul(vw, K.permute_dimensions(attw, (0,2,1)))
+        outw = K.permute_dimensions(tf.reshape(outw, [-1, height, dim, width]), (0,1,3,2))
+
+        outh = tf.cast(outh, tf.float32)
+        outw = tf.cast(outw, tf.float32)
+        m_input = tf.cast(m_input, tf.float32)
+        final = p*(outh+outw)+m_input
+        t = Model(m_input, final)
+        return t
 

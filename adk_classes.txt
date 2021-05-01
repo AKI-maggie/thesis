@@ -1,0 +1,2 @@
+['void', 'wall', 'building', 'sky', 'floor', 'tree', 'ceiling','road',
+'bed','window','grass','cabinet','sidewalk','person','earth',]
